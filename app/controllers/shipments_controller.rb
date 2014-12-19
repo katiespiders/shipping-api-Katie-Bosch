@@ -10,7 +10,11 @@ class ShipmentsController < ApplicationController
     end
 
     rates
-    render json: @rates, status: 202
+
+    respond_to do |format|
+      format.xml  { render xml: @rates}
+      format.json { render json: @rates }
+    end
   end
 
   private
@@ -26,7 +30,6 @@ class ShipmentsController < ApplicationController
     def rates
       response = @carrier_obj.find_rates(origin, destination, packages)
       @rates = response.rates.sort_by(&:price).collect {|rate| [rate.service_name, rate.price]}
-      raise
     end
 
     def carrier

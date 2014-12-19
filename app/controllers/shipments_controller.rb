@@ -4,20 +4,23 @@ include ActiveMerchant::Shipping
 class ShipmentsController < ApplicationController
 
   def show
-    case carrier
-    when 'USPS' then usps
-    when 'FedEx' then fedex
-    end
-
-    rates
-
-    respond_to do |format|
-      format.xml  { render xml: @rates}
-      format.json { render json: @rates }
+    begin
+      Timeout::timeout(15) { display_rates }
+    rescue Timeout::Error
+      render json: {error: timeout_error}, status: :request_timeout
     end
   end
 
   private
+
+    def display_rates
+      case carrier
+      when 'USPS' then usps
+      when 'FedEx' then fedex
+      end
+
+      rates
+    end
 
     def fedex
       @carrier_obj = FedEx.new(login: ENV['FEDEX_LOGIN'], password: ENV['FEDEX_PW'], key: ENV['FEDEX_KEY'], account: ENV['FEDEX_ACCT'], test: true)
@@ -28,8 +31,20 @@ class ShipmentsController < ApplicationController
     end
 
     def rates
+      if valid_address?
+        rates_array
+        respond_to do |format|
+          format.xml  { render xml: rates_array, status: :ok}
+          format.json { render json: rates_array, status: :ok }
+        end
+      else
+        render json: {error: incomplete_error}, status: :bad_request
+      end
+    end
+
+    def rates_array
       response = @carrier_obj.find_rates(origin, destination, packages)
-      @rates = response.rates.sort_by(&:price).collect {|rate| [rate.service_name, rate.price]}
+      response.rates.sort_by(&:price).collect {|rate| [rate.service_name, rate.price]}
     end
 
     def carrier
@@ -56,6 +71,22 @@ class ShipmentsController < ApplicationController
     end
 
     def destination
-      Location.new(params.require(:destination).permit(:country, :state, :city, :zip))
+      Location.new(destination_params)
+    end
+
+    def valid_address?
+      !destination_params.has_value?(nil)
+    end
+
+    def destination_params
+      params.require(:destination).permit(:country, :state, :city, :zip)
+    end
+
+    def timeout_error
+      "Timed out; this is either FedEx's or USPS's fault."
+    end
+
+    def incomplete_error
+      "Destination address is incomplete"
     end
 end

@@ -4,41 +4,52 @@ include ActiveMerchant::Shipping
 class ShipmentsController < ApplicationController
 
   def show
-    begin
-      Timeout::timeout(15) { display_rates }
-    rescue Timeout::Error
-      render json: {error: timeout_error}, status: :request_timeout
-    end
+    call_api_with_timeout
   end
 
   private
 
-    def display_rates
-      case carrier
-      when 'USPS' then usps
-      when 'FedEx' then fedex
+    def call_api_with_timeout
+      begin
+        Timeout::timeout(10) {
+          case carrier
+          when "USPS" then call_usps
+          when "FedEx" then call_fedex
+          end
+        }
+        get_rates
+
+      rescue Timeout::Error
+        render json: [timeout_error], status: :request_timeout
       end
 
-      rates
+      log_request
     end
 
-    def fedex
+    def log_request
+      Log.create(
+        status: status,
+        params: params.to_json,
+        from: request.remote_host
+      )
+    end
+
+    def call_fedex
       @carrier_obj = FedEx.new(login: ENV['FEDEX_LOGIN'], password: ENV['FEDEX_PW'], key: ENV['FEDEX_KEY'], account: ENV['FEDEX_ACCT'], test: true)
     end
 
-    def usps
+    def call_usps
       @carrier_obj = USPS.new(login: ENV['USPS_KEY'])
     end
 
-    def rates
+    def get_rates
       if valid_address?
-        rates_array
         respond_to do |format|
           format.xml  { render xml: rates_array, status: :ok}
           format.json { render json: rates_array, status: :ok }
         end
       else
-        render json: {error: incomplete_error}, status: :bad_request
+        render json: [incomplete_error], status: :bad_request
       end
     end
 
@@ -52,8 +63,8 @@ class ShipmentsController < ApplicationController
     end
 
     def packages
-      packages_hash, packages_array = params[:packages], []
-      packages_hash.each do |index, package|
+      packages_array = []
+      params[:packages].each do |index, package|
         weight = package[:weight].to_i
         dimensions = package[:dimensions].collect {|d| d.to_i}
         packages_array << Package.new(weight, dimensions)
@@ -83,10 +94,10 @@ class ShipmentsController < ApplicationController
     end
 
     def timeout_error
-      "Timed out; this is either FedEx's or USPS's fault."
+      "#{carrier}'s API timed out. Blame them.".html_safe
     end
 
     def incomplete_error
-      "Destination address is incomplete"
+      "Destination address is incomplete."
     end
 end

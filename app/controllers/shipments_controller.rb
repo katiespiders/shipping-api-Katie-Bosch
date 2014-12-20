@@ -11,19 +11,22 @@ class ShipmentsController < ApplicationController
 
     def call_api_with_timeout
       begin
-        Timeout::timeout(10) {
+        Timeout::timeout(1) {
           case carrier
-          when "USPS" then call_usps
-          when "FedEx" then call_fedex
+          when "USPS"
+            call_usps
+            log_request
+          when "FedEx"
+            call_fedex
+            log_request
           end
         }
         get_rates
 
       rescue Timeout::Error
         render json: [timeout_error], status: :request_timeout
+        log_request
       end
-
-      log_request
     end
 
     def log_request
@@ -50,6 +53,7 @@ class ShipmentsController < ApplicationController
         end
       else
         render json: [incomplete_error], status: :bad_request
+        log_request
       end
     end
 

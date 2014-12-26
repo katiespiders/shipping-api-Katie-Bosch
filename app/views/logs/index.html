@@ -1,0 +1,39 @@
+<table class='table'>
+  <tr>
+    <th>
+      status
+    </th>
+    <th>
+      carrier
+    </th>
+    <th>
+      to zip
+    </th>
+    <th>
+      from
+    </th>
+    <th>
+      timestamp
+    </th>
+  </tr>
+
+  <% Log.all.each do |entry| %>
+    <tr>
+      <td>
+        <%= entry.status %>
+      </td>
+      <td>
+        <%= entry.params['carrier'] %>
+      </td>
+      <td>
+        <%= entry.params['destination']['zip'] %>
+      </td>
+      <td>
+        <%= entry.from %>
+      </td>
+      <td>
+        <%= entry.created_at %>
+      </td>
+    </tr>
+  <% end %>
+</table>

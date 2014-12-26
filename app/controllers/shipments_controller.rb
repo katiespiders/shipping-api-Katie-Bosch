@@ -4,6 +4,7 @@ include ActiveMerchant::Shipping
 class ShipmentsController < ApplicationController
 
   def show
+    puts "&"*80, "DOING STUFF"
     call_api_with_timeout
   end
 

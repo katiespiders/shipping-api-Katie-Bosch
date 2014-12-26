@@ -11,7 +11,7 @@ class ShipmentsController < ApplicationController
 
     def call_api_with_timeout
       begin
-        Timeout::timeout(1) {
+        Timeout::timeout(10) {
           case carrier
           when "USPS"
             call_usps
@@ -48,6 +48,7 @@ class ShipmentsController < ApplicationController
     def get_rates
       if valid_address?
         respond_to do |format|
+          logger.debug 'gonna get some rates'
           format.xml  { render xml: rates_array, status: :ok}
           format.json { render json: rates_array, status: :ok }
         end

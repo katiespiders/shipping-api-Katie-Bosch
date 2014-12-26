@@ -39,16 +39,18 @@ class ShipmentsController < ApplicationController
 
     def call_fedex
       @carrier_obj = FedEx.new(login: ENV['FEDEX_LOGIN'], password: ENV['FEDEX_PW'], key: ENV['FEDEX_KEY'], account: ENV['FEDEX_ACCT'], test: true)
+      puts "MADE FEDEX OBJECT"
     end
 
     def call_usps
       @carrier_obj = USPS.new(login: ENV['USPS_KEY'])
+      puts "MADE USPS OBJECT"
     end
 
     def get_rates
       if valid_address?
         respond_to do |format|
-          logger.debug 'gonna get some rates'
+          puts "GETTING RATES"
           format.xml  { render xml: rates_array, status: :ok}
           format.json { render json: rates_array, status: :ok }
         end

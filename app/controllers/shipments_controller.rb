@@ -4,7 +4,6 @@ include ActiveMerchant::Shipping
 class ShipmentsController < ApplicationController
 
   def show
-    puts "&"*80, "DOING STUFF"
     call_api_with_timeout
   end
 
@@ -62,7 +61,9 @@ class ShipmentsController < ApplicationController
     end
 
     def rates_array
+      puts @carrier_obj.inspect
       response = @carrier_obj.find_rates(origin, destination, packages)
+      puts response.inspect
       response.rates.sort_by(&:price).collect {|rate| [rate.service_name, rate.price]}
     end
 

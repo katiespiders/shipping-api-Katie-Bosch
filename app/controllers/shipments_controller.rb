@@ -63,7 +63,7 @@ class ShipmentsController < ApplicationController
     def rates_array
       puts @carrier_obj.inspect
       response = @carrier_obj.find_rates(origin, destination, packages)
-      puts response.inspect
+      puts "RESPONSE IS A #{response.class.upcase}: #{response.inspect}"
       response.rates.sort_by(&:price).collect {|rate| [rate.service_name, rate.price]}
     end
 

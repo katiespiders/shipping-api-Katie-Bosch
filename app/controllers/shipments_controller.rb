@@ -71,9 +71,9 @@ class ShipmentsController < ApplicationController
     end
 
     def packages
-      puts "PARAMS KEYS ARE #{params.keys}"
+      puts "PACKAGES ARE #{params[:packages]} OR MAYBE #{params['packages']}"
       packages_array = []
-      params["packages"].each do |index, package|
+      params[:packages].each do |index, package|
         weight = package[:weight].to_i
         dimensions = package[:dimensions].collect {|d| d.to_i}
         packages_array << Package.new(weight, dimensions)

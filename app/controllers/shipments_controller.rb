@@ -71,7 +71,7 @@ class ShipmentsController < ApplicationController
     end
 
     def packages
-      puts "PACKAGES ARE #{params[:packages]} OR MAYBE #{params['packages']}"
+      puts "PACKAGES ARE #{params[:packages]} OR MAYBE #{params['packages']}. IT'S A #{params[:packages].class.upcase}."
       packages_array = []
       params[:packages].each do |index, package|
         weight = package[:weight].to_i

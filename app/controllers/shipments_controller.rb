@@ -75,7 +75,7 @@ class ShipmentsController < ApplicationController
       packages_array = []
       params[:packages].each do |index, package|
         weight = package[:weight].to_i
-        dimensions = package[:dimensions].collect {|d| d.to_i}
+        dimensions = package[:dimensions].values.collect {|d| d.to_i}
         packages_array << Package.new(weight, dimensions)
       end
       packages_array

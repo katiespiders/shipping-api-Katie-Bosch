@@ -39,18 +39,15 @@ class ShipmentsController < ApplicationController
 
     def call_fedex
       @carrier_obj = FedEx.new(login: ENV['FEDEX_LOGIN'], password: ENV['FEDEX_PW'], key: ENV['FEDEX_KEY'], account: ENV['FEDEX_ACCT'], test: true)
-      puts "MADE FEDEX OBJECT"
     end
 
     def call_usps
       @carrier_obj = USPS.new(login: ENV['USPS_KEY'])
-      puts "MADE USPS OBJECT"
     end
 
     def get_rates
       if valid_address?
         respond_to do |format|
-          puts "GETTING RATES"
           format.xml  { render xml: rates_array, status: :ok}
           format.json { render json: rates_array, status: :ok }
         end
@@ -62,7 +59,6 @@ class ShipmentsController < ApplicationController
 
     def rates_array
       response = @carrier_obj.find_rates(origin, destination, packages)
-      puts "RESPONSE IS A #{response.class}: #{response.inspect}"
       response.rates.sort_by(&:price).collect {|rate| [rate.service_name, rate.price]}
     end
 
@@ -71,7 +67,6 @@ class ShipmentsController < ApplicationController
     end
 
     def packages
-      puts "PACKAGES ARE #{params[:packages]} OR MAYBE #{params['packages']}. IT'S A #{params[:packages].class.to_s.upcase}."
       packages_array = []
       params[:packages].each do |index, package|
         weight = package[:weight].to_i

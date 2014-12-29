@@ -63,7 +63,7 @@ class ShipmentsController < ApplicationController
     def rates_array
       response = @carrier_obj.find_rates(origin, destination, packages)
       puts "RESPONSE IS A #{response.class}: #{response.inspect}"
-      #response.rates.sort_by(&:price).collect {|rate| [rate.service_name, rate.price]}
+      response.rates.sort_by(&:price).collect {|rate| [rate.service_name, rate.price]}
     end
 
     def carrier

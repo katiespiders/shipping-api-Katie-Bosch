@@ -62,7 +62,7 @@ class ShipmentsController < ApplicationController
 
     def rates_array
       response = @carrier_obj.find_rates(origin, destination, packages)
-      puts "RESPONSE IS A #{response.class.upcase}: #{response.inspect}"
+      puts "RESPONSE IS A #{response.class}: #{response.inspect}"
       #response.rates.sort_by(&:price).collect {|rate| [rate.service_name, rate.price]}
     end
 
@@ -71,7 +71,7 @@ class ShipmentsController < ApplicationController
     end
 
     def packages
-      puts "PACKAGES ARE #{params[:packages]} OR MAYBE #{params['packages']}. IT'S A #{params[:packages].class.upcase}."
+      puts "PACKAGES ARE #{params[:packages]} OR MAYBE #{params['packages']}. IT'S A #{params[:packages].class.to_s.upcase}."
       packages_array = []
       params[:packages].each do |index, package|
         weight = package[:weight].to_i
